@@ -11,6 +11,10 @@ export class LiveChat extends EventEmitter {
   private static readonly headers = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36'}
   public readonly channelId?: string
   public liveId?: string
+  private key?: string
+  private continuation?: string
+  private clientName?: string
+  private clientVersion?: string
   private prevTime = Date.now()
   private observer?: NodeJS.Timeout
 
@@ -32,7 +36,6 @@ export class LiveChat extends EventEmitter {
         this.emit('error', new Error("Live stream offline"))
         return false
       }
-      this.liveId = liveRes.data.match(/"watchEndpoint":{"videoId":"(\S*?)"}/)![1] as string
       this.liveId = liveRes.data.match(/"liveStreamabilityRenderer":{"videoId":"(\S*?)",/)![1] as string
       this.key = liveRes.data.match(/"INNERTUBE_API_KEY":"(\S*?)"/)![1] as string
       this.continuation = liveRes.data.match(/"continuation":"(\S*?)"/)![1] as string
