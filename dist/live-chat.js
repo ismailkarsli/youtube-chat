@@ -24,22 +24,30 @@ class LiveChat extends events_1.EventEmitter {
         }
     }
     async start() {
+        var liveRes = null;
+        if (this.liveId) {
+            liveRes = await axios_1.default.get(`https://www.youtube.com/watch?v=${this.liveId}`, { headers: LiveChat.headers });
+            if (liveRes.data.match(/LIVE_STREAM_OFFLINE/)) {
+                this.emit('error', new Error("Live stream offline"));
+                return false;
+            }
+        }
         if (this.channelId) {
-            const liveRes = await axios_1.default.get(`https://www.youtube.com/channel/${this.channelId}/live`, { headers: LiveChat.headers });
+            liveRes = await axios_1.default.get(`https://www.youtube.com/channel/${this.channelId}/live`, { headers: LiveChat.headers });
             if (liveRes.data.match(/LIVE_STREAM_OFFLINE/)) {
                 this.emit('error', new Error("Live stream offline"));
                 return false;
             }
             this.liveId = liveRes.data.match(/"liveStreamabilityRenderer":{"videoId":"(\S*?)",/)[1];
-            this.key = liveRes.data.match(/"INNERTUBE_API_KEY":"(\S*?)"/)[1];
-            this.continuation = liveRes.data.match(/"continuation":"(\S*?)"/)[1];
-            this.clientName = liveRes.data.match(/"clientName":"(\S*?)"/)[1];
-            this.clientVersion = liveRes.data.match(/"clientVersion":"(\S*?)"/)[1];
         }
-        if (!this.liveId) {
+        if (!this.liveId || liveRes === null) {
             this.emit('error', new Error('Live stream not found'));
             return false;
         }
+        this.key = liveRes.data.match(/"INNERTUBE_API_KEY":"(\S*?)"/)[1];
+        this.continuation = liveRes.data.match(/"continuation":"(\S*?)"/)[1];
+        this.clientName = liveRes.data.match(/"clientName":"(\S*?)"/)[1];
+        this.clientVersion = liveRes.data.match(/"clientVersion":"(\S*?)"/)[1];
         this.observer = setInterval(() => this.fetchChat(), this.interval);
         this.emit('start', this.liveId);
         return true;

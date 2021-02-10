@@ -30,23 +30,33 @@ export class LiveChat extends EventEmitter {
   }
 
   public async start(): Promise<boolean> {
+    var liveRes = null;
+    if (this.liveId) {
+      liveRes = await axios.get(`https://www.youtube.com/watch?v=${this.liveId}`, {headers: LiveChat.headers})
+      if (liveRes.data.match(/LIVE_STREAM_OFFLINE/)) {
+        this.emit('error', new Error("Live stream offline"))
+        return false
+      }
+    }
+
     if (this.channelId) {
-      const liveRes = await axios.get(`https://www.youtube.com/channel/${this.channelId}/live`, {headers: LiveChat.headers})
+      liveRes = await axios.get(`https://www.youtube.com/channel/${this.channelId}/live`, {headers: LiveChat.headers})
       if (liveRes.data.match(/LIVE_STREAM_OFFLINE/)) {
         this.emit('error', new Error("Live stream offline"))
         return false
       }
       this.liveId = liveRes.data.match(/"liveStreamabilityRenderer":{"videoId":"(\S*?)",/)![1] as string
-      this.key = liveRes.data.match(/"INNERTUBE_API_KEY":"(\S*?)"/)![1] as string
-      this.continuation = liveRes.data.match(/"continuation":"(\S*?)"/)![1] as string
-      this.clientName = liveRes.data.match(/"clientName":"(\S*?)"/)![1] as string
-      this.clientVersion = liveRes.data.match(/"clientVersion":"(\S*?)"/)![1] as string
     }
 
-    if (!this.liveId) {
+    if (!this.liveId || liveRes === null) {
       this.emit('error', new Error('Live stream not found'))
       return false
     }
+    
+    this.key = liveRes.data.match(/"INNERTUBE_API_KEY":"(\S*?)"/)![1] as string
+    this.continuation = liveRes.data.match(/"continuation":"(\S*?)"/)![1] as string
+    this.clientName = liveRes.data.match(/"clientName":"(\S*?)"/)![1] as string
+    this.clientVersion = liveRes.data.match(/"clientVersion":"(\S*?)"/)![1] as string
 
     this.observer = setInterval(() => this.fetchChat(), this.interval)
 
