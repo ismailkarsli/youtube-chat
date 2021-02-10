@@ -33,6 +33,11 @@ export class LiveChat extends EventEmitter {
         return false
       }
       this.liveId = liveRes.data.match(/"watchEndpoint":{"videoId":"(\S*?)"}/)![1] as string
+      this.liveId = liveRes.data.match(/"liveStreamabilityRenderer":{"videoId":"(\S*?)",/)![1] as string
+      this.key = liveRes.data.match(/"INNERTUBE_API_KEY":"(\S*?)"/)![1] as string
+      this.continuation = liveRes.data.match(/"continuation":"(\S*?)"/)![1] as string
+      this.clientName = liveRes.data.match(/"clientName":"(\S*?)"/)![1] as string
+      this.clientVersion = liveRes.data.match(/"clientVersion":"(\S*?)"/)![1] as string
     }
 
     if (!this.liveId) {
@@ -54,13 +59,22 @@ export class LiveChat extends EventEmitter {
   }
 
   private async fetchChat() {
-    const res = await axios.get(`https://www.youtube.com/live_chat?v=${this.liveId}&pbj=1`, {headers: LiveChat.headers})
-    if (res.data[1].response.contents.messageRenderer) {
+    const res = await axios.post(`https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?key=${this.key}`, {
+      context: {
+        client: {
+          clientName: this.clientName,
+          clientVersion: this.clientVersion,
+        }
+      },
+      continuation: this.continuation
+    }, {headers: LiveChat.headers})
+
+    if (res.data.continuationContents.messageRenderer) {
       this.stop("Live stream is finished")
       return
     }
 
-    const items = res.data[1].response.contents.liveChatRenderer.actions.slice(0, -1)
+    const items = res.data.continuationContents.liveChatContinuation.actions.slice(0, -1)
       .filter((v: Action) => {
         const messageRenderer = actionToRenderer(v)
         if (messageRenderer !== null) {
