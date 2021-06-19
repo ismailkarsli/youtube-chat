@@ -1,7 +1,11 @@
 # youtube-chat
 > Fetch Youtube live chat without API
 
-***You will need to take full responsibility for your action***
+This module is a fork of `youtube-chat`, which was written by [LinaTsukusu](https://github.com/LinaTsukusu) and fixed up by [IcedCoffeee](https://github.com/IcedCoffeee).
+
+Since the original maintainer doesn't work on this package, we forked it and maintain it for the needs of FreeTube.
+
+***You will need to take full responsibility for your actions***
 
 ## Getting started
 1. Install
