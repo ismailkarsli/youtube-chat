@@ -1,16 +1,40 @@
 {
-  "name": "youtube-chat",
-  "version": "1.1.0",
+  "name": "@freetube/youtube-chat",
+  "version": "1.1.1",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "repository": "https://github.com/LinaTsukusu/youtube-chat.git",
-  "author": "LinaTsukusu <lina.tsukusu@gmail.com>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/FreeTubeApp/youtube-chat.git"
+  },
+  "bugs": {
+    "url": "https://github.com/FreeTubeApp/youtube-chat/issues"
+  },
+  "homepage": "https://github.com/FreeTubeApp/youtube-chat#readme",
+  "author": {
+    "name": "Svallinn",
+    "email": "svallinn@protonmail.com"
+  },
+  "contributors": [
+    {
+      "name": "LinaTsukusu",
+      "email": "lina.tsukusu@gmail.com"
+    },
+    {
+      "name": "IcedCoffeee",
+      "url": "https://github.com/IcedCoffeee/"
+    }
+  ],
   "license": "MIT",
   "private": false,
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "tsc",
     "start": "NODE_ENV=production node dist",
-    "debug": "tsc && NODE_ENV=development node dist/debug.js"
+    "debug": "tsc && NODE_ENV=development node dist/debug.js",
+    "test": "jest --verbose"
   },
   "files": [
     "dist",
@@ -33,6 +57,6 @@
     "typescript": "^3.8.3"
   },
   "dependencies": {
-    "axios": "^0.19.2"
+    "axios": "^0.21.1"
   }
 }
