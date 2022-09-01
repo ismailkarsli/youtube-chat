@@ -1,6 +1,7 @@
 /// <reference types="node" />
-import { EventEmitter } from 'events';
-import { CommentItem } from './parser';
+import { EventEmitter } from "events";
+import { AxiosInstance } from "axios";
+import { CommentItem } from "./parser";
 /**
  * YouTubeライブチャット取得イベント
  */
@@ -15,16 +16,19 @@ export declare class LiveChat extends EventEmitter {
     private clientVersion?;
     private prevTime;
     private observer?;
+    private axiosInstance;
     constructor(options: {
         channelId: string;
+        axiosInstance: AxiosInstance;
     } | {
         liveId: string;
+        axiosInstance: AxiosInstance;
     }, interval?: number);
     start(): Promise<boolean>;
     stop(reason?: string): void;
     private fetchChat;
-    on(event: 'comment', listener: (comment: CommentItem) => void): this;
-    on(event: 'start', listener: (liveId: string) => void): this;
-    on(event: 'end', listener: (reason?: string) => void): this;
-    on(event: 'error', listener: (err: Error) => void): this;
+    on(event: "comment", listener: (comment: CommentItem) => void): this;
+    on(event: "start", listener: (liveId: string) => void): this;
+    on(event: "end", listener: (reason?: string) => void): this;
+    on(event: "error", listener: (err: Error) => void): this;
 }

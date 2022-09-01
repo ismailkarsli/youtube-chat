@@ -13,35 +13,41 @@ class LiveChat extends events_1.EventEmitter {
         super();
         this.interval = interval;
         this.prevTime = Date.now();
-        if ('channelId' in options) {
+        if ("channelId" in options) {
             this.channelId = options.channelId;
         }
-        else if ('liveId' in options) {
+        else if ("liveId" in options) {
             this.liveId = options.liveId;
         }
         else {
             throw TypeError("Required channelId or liveId.");
         }
+        if (options.axiosInstance) {
+            this.axiosInstance = options.axiosInstance;
+        }
+        else {
+            this.axiosInstance = axios_1.default.create();
+        }
     }
     async start() {
         var liveRes = null;
         if (this.liveId) {
-            liveRes = await axios_1.default.get(`https://www.youtube.com/watch?v=${this.liveId}`, { headers: LiveChat.headers });
+            liveRes = await this.axiosInstance.get(`https://www.youtube.com/watch?v=${this.liveId}`, { headers: LiveChat.headers });
             if (liveRes.data.match(/LIVE_STREAM_OFFLINE/)) {
-                this.emit('error', new Error("Live stream offline"));
+                this.emit("error", new Error("Live stream offline"));
                 return false;
             }
         }
         if (this.channelId) {
-            liveRes = await axios_1.default.get(`https://www.youtube.com/channel/${this.channelId}/live`, { headers: LiveChat.headers });
+            liveRes = await this.axiosInstance.get(`https://www.youtube.com/channel/${this.channelId}/live`, { headers: LiveChat.headers });
             if (liveRes.data.match(/LIVE_STREAM_OFFLINE/)) {
-                this.emit('error', new Error("Live stream offline"));
+                this.emit("error", new Error("Live stream offline"));
                 return false;
             }
             this.liveId = liveRes.data.match(/"liveStreamabilityRenderer":{"videoId":"(\S*?)",/)[1];
         }
         if (!this.liveId || liveRes === null) {
-            this.emit('error', new Error('Live stream not found'));
+            this.emit("error", new Error("Live stream not found"));
             return false;
         }
         this.key = liveRes.data.match(/"INNERTUBE_API_KEY":"(\S*?)"/)[1];
@@ -49,30 +55,31 @@ class LiveChat extends events_1.EventEmitter {
         this.clientName = liveRes.data.match(/"clientName":"(\S*?)"/)[1];
         this.clientVersion = liveRes.data.match(/"clientVersion":"(\S*?)"/)[1];
         this.observer = setInterval(() => this.fetchChat(), this.interval);
-        this.emit('start', this.liveId);
+        this.emit("start", this.liveId);
         return true;
     }
     stop(reason) {
         if (this.observer) {
             clearInterval(this.observer);
-            this.emit('end', reason);
+            this.emit("end", reason);
         }
     }
     async fetchChat() {
-        const res = await axios_1.default.post(`https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?key=${this.key}`, {
+        const res = await this.axiosInstance.post(`https://www.youtube.com/youtubei/v1/live_chat/get_live_chat?key=${this.key}`, {
             context: {
                 client: {
                     clientName: this.clientName,
                     clientVersion: this.clientVersion,
-                }
+                },
             },
-            continuation: this.continuation
+            continuation: this.continuation,
         }, { headers: LiveChat.headers });
         if (res.data.continuationContents.messageRenderer) {
             this.stop("Live stream is finished");
             return;
         }
-        const items = res.data.continuationContents.liveChatContinuation.actions.slice(0, -1)
+        const items = res.data.continuationContents.liveChatContinuation.actions
+            .slice(0, -1)
             .filter((v) => {
             const messageRenderer = parser_1.actionToRenderer(v);
             if (messageRenderer !== null) {
@@ -84,7 +91,7 @@ class LiveChat extends events_1.EventEmitter {
         })
             .map((v) => parser_1.parseData(v));
         items.forEach((v) => {
-            this.emit('comment', v);
+            this.emit("comment", v);
         });
         if (items.length > 0) {
             this.prevTime = items[items.length - 1].timestamp;
@@ -95,5 +102,7 @@ class LiveChat extends events_1.EventEmitter {
     }
 }
 exports.LiveChat = LiveChat;
-LiveChat.headers = { 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36' };
+LiveChat.headers = {
+    "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/75.0.3770.142 Safari/537.36",
+};
 //# sourceMappingURL=live-chat.js.map
