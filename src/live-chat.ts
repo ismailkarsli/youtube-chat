@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import axios, { AxiosInstance } from "axios";
+import axios from "axios";
 import { actionToRenderer, CommentItem, parseData, usecToTime } from "./parser";
 import { Action } from "./yt-response";
 
@@ -19,12 +19,12 @@ export class LiveChat extends EventEmitter {
   private clientVersion?: string;
   private prevTime = Date.now();
   private observer?: NodeJS.Timeout;
-  private axiosInstance: AxiosInstance;
+  private axiosInstance: any;
 
   constructor(
     options:
-      | { channelId: string; axiosInstance: AxiosInstance }
-      | { liveId: string; axiosInstance: AxiosInstance },
+      | { channelId: string; axiosInstance: any }
+      | { liveId: string; axiosInstance: any },
     private interval = 1000
   ) {
     super();

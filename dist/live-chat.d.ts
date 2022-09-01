@@ -1,6 +1,5 @@
 /// <reference types="node" />
 import { EventEmitter } from "events";
-import { AxiosInstance } from "axios";
 import { CommentItem } from "./parser";
 /**
  * YouTubeライブチャット取得イベント
@@ -19,10 +18,10 @@ export declare class LiveChat extends EventEmitter {
     private axiosInstance;
     constructor(options: {
         channelId: string;
-        axiosInstance: AxiosInstance;
+        axiosInstance: any;
     } | {
         liveId: string;
-        axiosInstance: AxiosInstance;
+        axiosInstance: any;
     }, interval?: number);
     start(): Promise<boolean>;
     stop(reason?: string): void;
