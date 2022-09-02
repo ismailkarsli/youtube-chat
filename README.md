@@ -6,6 +6,8 @@ This module is a fork of `youtube-chat`, which was written by [LinaTsukusu](http
 
 Since the original maintainer doesn't work on this package, we forked it and maintain it for the needs of FreeTube.
 
+And I ([ismailkarsli](https://github.com/ismailkarsli)) added custom axios instance support for my needs.
+
 **_You will need to take full responsibility for your actions_**
 
 ## Getting started
